@@ -21,7 +21,7 @@ class CommentSerializer(serializers.ModelSerializer):
     author_details = UserSerializer(source = 'author', read_only=True)  # Usa el serializador UserSerializer para representar al autor
     class Meta:
         model = Comment
-        fields = ('id','text','post', 'author','author_details')
+        fields = ('id','text','post', 'author','author_details', "created_at")
 
 class PostSerializer(serializers.ModelSerializer):
     """Post Serializer"""
@@ -29,7 +29,7 @@ class PostSerializer(serializers.ModelSerializer):
     author_details = UserSerializer(source = 'author', read_only=True)  # Usa el serializador UserSerializer para representar al autor
     class Meta:
         model = Post
-        fields = ("id","description", "title", "comments", "image",  "author_details")
+        fields = ("id","description", "title", "comments", "image",  "author_details", "created_at")
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)

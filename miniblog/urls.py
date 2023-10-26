@@ -22,7 +22,7 @@ from rest_framework_simplejwt.views import (
     TokenVerifyView
 )
 
-from miniblog.post.views import CommentListCreateAPIView, CommentRetrieveUpdateDestroyAPIView, CookieTokenObtainPairView, CookieTokenRefreshView, PostCreateAPIView, PostListAPIView, PostRetrieveUpdateDestroyAPIView, RegisterView, MyLoginView
+from miniblog.post.views import CommentListCreateAPIView, CommentRetrieveUpdateDestroyAPIView, CookieTokenObtainPairView, CookieTokenRefreshView, PostCreateAPIView, PostListAPIView, PostRetrieveUpdateDestroyAPIView, RegisterView, MyLoginView, LogoutView
 urlpatterns = [
     # path('api/', include("miniblog.post.urls")),
     path('api/post', PostListAPIView.as_view(), name='post-list'),
@@ -35,6 +35,7 @@ urlpatterns = [
     path('api/token/', CookieTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/register/', RegisterView.as_view(), name='register_user'),
     path('api/token/refresh/', CookieTokenRefreshView.as_view(), name='token_refresh'),
+    path('api/token/logout/', LogoutView.as_view(), name='token_delete'),
     # path('api/token/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
     # path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
         path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),

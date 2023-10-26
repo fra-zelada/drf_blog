@@ -22,6 +22,8 @@ from rest_framework.response import Response
 from django.http import JsonResponse
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer  # Importa el serializador predeterminado
+from rest_framework_simplejwt.views import TokenViewBase
+
 
 from django.contrib.auth import authenticate
 
@@ -267,3 +269,8 @@ class MyLoginView(APIView):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class LogoutView(APIView):
+    def post(self, request):
+        response = JsonResponse({"message": "Refresh token revoked"})
+        response.delete_cookie("refresh_token")
+        return response
