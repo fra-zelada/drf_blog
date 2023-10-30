@@ -161,9 +161,10 @@ class CookieTokenObtainPairView(TokenObtainPairView):
     def finalize_response(self, request, response, *args, **kwargs):
         if response.data.get('refresh'):
             # No establezcas max_age o establécelo en None para hacer la cookie de sesión
-            response.set_cookie('refresh_token', response.data['refresh'], httponly=True, samesite=None, domain=settings.SIMPLE_JWT['DOMAIN'])
-            # response['Access-Control-Allow-Origin'] = '192.168.1.108:5173'
-            del response.data['refresh']
+            cookie_max_age = 60 * 60 * 2
+            response.set_cookie('refresh_token', response.data['refresh'],max_age=cookie_max_age , httponly=True, samesite='None' , secure=True )
+            response['Access-Control-Allow-Origin'] = '192.168.1.108:5173'
+            # del response.data['refresh']
         access_token = response.data.get('access')
 
         if access_token:
@@ -200,8 +201,8 @@ class CookieTokenObtainPairView(TokenObtainPairView):
 class CookieTokenRefreshView(TokenRefreshView):
     def finalize_response(self, request, response, *args, **kwargs):
         if response.data.get('refresh'):
-            cookie_max_age = 3600 * 24 * 14 # 14 days
-            response.set_cookie('refresh_token', response.data['refresh'], max_age=cookie_max_age, httponly=True)
+            cookie_max_age = 60 * 60 * 2
+            response.set_cookie('refresh_token', response.data['refresh'], httponly=True, samesite='None' , secure=True )
             del response.data['refresh']
         return super().finalize_response(request, response, *args, **kwargs)
     serializer_class = CookieTokenRefreshSerializer
@@ -236,7 +237,7 @@ class RegisterView(CreateAPIView):
         # Configura la cookie
         cookie_max_age = 3600 * 24 * 14  # 14 days
         response = JsonResponse(response_data)
-        response.set_cookie('refresh_token', str(refresh), max_age=cookie_max_age, httponly=True)
+        response.set_cookie('refresh_token', response.data['refresh'], httponly=True, samesite='None' , secure=True )
 
         return response
 
@@ -272,6 +273,7 @@ class MyLoginView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class LogoutView(APIView):
+    permission_classes = (AllowAny,)
     def post(self, request):
         response = JsonResponse({"message": "Refresh token revoked"})
         response.delete_cookie("refresh_token")

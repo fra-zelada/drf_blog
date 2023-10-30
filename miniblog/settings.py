@@ -119,15 +119,21 @@ REST_FRAMEWORK = {
 }
 
 # CORS settings
-CORS_ALLOW_HEADERS = ["Content-Type"]
+CORS_ALLOW_HEADERS = [    "accept",
+    "authorization",
+    "content-type",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with"]
 CORS_ALLOW_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
+CORS_EXPOSE_HEADERS = []
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_PRIVATE_NETWORK = True  # Opcional, depende de tus necesidades
 
 # Define los orígenes permitidos
 CORS_ORIGIN_WHITELIST = [
     "http://localhost:5173",
-    "https://192.168.1.108:5173",
+    "http://192.168.1.108:5173",
     'http://cliente.local:5173'
 ]
 
@@ -136,13 +142,13 @@ SIMPLE_JWT = {
     "TOKEN_OBTAIN_SERIALIZER": "miniblog.post.serializers.MyTokenObtainPairSerializer",
     "ACCESS_TOKEN_COOKIE_NAME": 'access_token',
     "ACCESS_TOKEN_LIFETIME": timedelta(seconds=15),
-    "DOMAIN": 'cliente.local:5173'
+
 }
 
 # Security settings
-# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SESSION_COOKIE_HTTPONLY = True
-SESSION_COOKIE_SAMESITE = True
-CSRF_COOKIE_SAMESITE = True
+SESSION_COOKIE_SAMESITE = None
+CSRF_COOKIE_SAMESITE = None
 SESSION_COOKIE_DOMAIN = ".192.168.1.108:5173"
 CSRF_COOKIE_HTTPONLY = True
