@@ -29,3 +29,6 @@ SECURE_SSL_CERTIFICATE = 'tu_proyecto/ssl/cert.pem'
 SECURE_SSL_KEY = 'tu_proyecto/ssl/key.pem'
 
 manage.py runsslserver
+
+source .virtualenvs/venv/bin/activate
+hacer migraciones

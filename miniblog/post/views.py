@@ -4,6 +4,8 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 from django.contrib.auth import get_user
 
+from miniblog import settings
+
 from .models import Comment, Image, Post
 from .serializers import CommentSerializer, PostSerializer, RegisterSerializer, UserSerializer
 
@@ -158,8 +160,9 @@ class CookieTokenObtainPairView(TokenObtainPairView):
 
     def finalize_response(self, request, response, *args, **kwargs):
         if response.data.get('refresh'):
-            cookie_max_age = 3600 * 24 * 14  # 14 days
-            response.set_cookie('refresh_token', response.data['refresh'], max_age=cookie_max_age, httponly=True)
+            # No establezcas max_age o establécelo en None para hacer la cookie de sesión
+            response.set_cookie('refresh_token', response.data['refresh'], httponly=True, samesite=None, domain=settings.SIMPLE_JWT['DOMAIN'])
+            # response['Access-Control-Allow-Origin'] = '192.168.1.108:5173'
             del response.data['refresh']
         access_token = response.data.get('access')
 
@@ -174,15 +177,14 @@ class CookieTokenObtainPairView(TokenObtainPairView):
                 first_name = decoded_token['first_name']
                 last_name = decoded_token['last_name']
 
-
                 response_data = {
-                'user': {
-                        'id':id,
-                        'username':username,
-                        'email':email,
-                        'first_name':first_name,
-                        'last_name':last_name,
-                        'access_token':access_token,
+                    'user': {
+                        'id': id,
+                        'username': username,
+                        'email': email,
+                        'first_name': first_name,
+                        'last_name': last_name,
+                        'access_token': access_token,
                         # Agrega otros campos de usuario si los deseas
                     }
                 }
