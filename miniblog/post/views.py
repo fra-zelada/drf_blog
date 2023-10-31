@@ -274,7 +274,16 @@ class MyLoginView(APIView):
 
 class LogoutView(APIView):
     permission_classes = (AllowAny,)
+
     def post(self, request):
-        response = JsonResponse({"message": "Refresh token revoked"})
-        response.delete_cookie("refresh_token")
-        return response
+        try:
+            refreshToken = request.COOKIES.get('refresh_token')
+            token = RefreshToken(refreshToken)
+            token.blacklist()
+            response = JsonResponse({"message": "Refresh token revoked"})
+            response.delete_cookie("refresh_token")
+            return response
+        except:
+            response = JsonResponse({"message": "Invalid token or token has expired"}, status=400)
+            return response
+
