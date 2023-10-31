@@ -144,6 +144,7 @@ SIMPLE_JWT = {
     "TOKEN_OBTAIN_SERIALIZER": "miniblog.post.serializers.MyTokenObtainPairSerializer",
     "ACCESS_TOKEN_COOKIE_NAME": 'access_token',
     "ACCESS_TOKEN_LIFETIME": timedelta(seconds=15),
+    "DOMAIN" : 'localhost:3000'
 
 }
 

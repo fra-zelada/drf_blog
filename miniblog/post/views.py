@@ -162,8 +162,8 @@ class CookieTokenObtainPairView(TokenObtainPairView):
         if response.data.get('refresh'):
             # No establezcas max_age o establécelo en None para hacer la cookie de sesión
             cookie_max_age = 60 * 60 * 2
-            response.set_cookie('refresh_token', response.data['refresh'],max_age=cookie_max_age , httponly=True, samesite='None' , secure=True )
-            response['Access-Control-Allow-Origin'] = '192.168.1.108:5173'
+            response.set_cookie('refresh_token', response.data['refresh'],max_age=cookie_max_age , httponly=True, samesite='None' , secure=True, domain=settings.SIMPLE_JWT['DOMAIN'] )
+            # response['Access-Control-Allow-Origin'] = '192.168.1.108:5173'
             # del response.data['refresh']
         access_token = response.data.get('access')
 
