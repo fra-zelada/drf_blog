@@ -1,4 +1,5 @@
-import cloudinary
+from datetime import timedelta
+import cloudinary.uploader
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
@@ -75,6 +76,7 @@ class PostCreateAPIView(CreateAPIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
+
 class PostListAPIView(ListAPIView):
     """"""
     queryset = Post.objects.all()
@@ -93,8 +95,21 @@ class PostRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
             return []
         else:
             # Requiere autenticación para otros métodos (update, destroy, etc.)
-            # return [IsAuthenticated()]
-            return []
+            return [IsAuthenticated()]
+            # return []
+    def delete(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return Response({'user': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        # Obtén el objeto Post o devuelve un error 404 si no existe
+        post = get_object_or_404(Post, pk=kwargs['pk'])
+
+        if post.author != request.user:
+            # Si el usuario no es el autor del post, no se le permite eliminarlo
+            return Response({'user': 'Unauthorized user for delete this post'}, status=status.HTTP_403_FORBIDDEN)
+
+        # El usuario está autenticado y es el autor del post, procede con la eliminación
+        return super().delete(request, *args, **kwargs)
 
 
 
@@ -121,6 +136,13 @@ class CommentListCreateAPIView(ListCreateAPIView):
 class CommentRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
+    def get_permissions(self):
+        return [IsAuthenticated()]
+
+    def delete(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return Response({'user': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
+        return super().delete(request, *args, **kwargs)
 
 class MyTokenObtainPairView(TokenObtainPairView):
     permission_classes = [AllowAny]
@@ -162,7 +184,7 @@ class CookieTokenObtainPairView(TokenObtainPairView):
         if response.data.get('refresh'):
             # No establezcas max_age o establécelo en None para hacer la cookie de sesión
             cookie_max_age = 60 * 60 * 2
-            response.set_cookie('refresh_token', response.data['refresh'],max_age=cookie_max_age , httponly=True, samesite='None' , secure=True, domain=settings.SIMPLE_JWT['DOMAIN'] )
+            response.set_cookie('refresh_token', response.data['refresh'],max_age=cookie_max_age , httponly=True, samesite='None' , secure=True)
             # response['Access-Control-Allow-Origin'] = '192.168.1.108:5173'
             # del response.data['refresh']
         access_token = response.data.get('access')
@@ -202,7 +224,7 @@ class CookieTokenRefreshView(TokenRefreshView):
     def finalize_response(self, request, response, *args, **kwargs):
         if response.data.get('refresh'):
             cookie_max_age = 60 * 60 * 2
-            response.set_cookie('refresh_token', response.data['refresh'], httponly=True, samesite='None' , secure=True )
+            response.set_cookie('refresh_token', response.data['refresh'],max_age=cookie_max_age , httponly=True, samesite='None' , secure=True)
             del response.data['refresh']
         return super().finalize_response(request, response, *args, **kwargs)
     serializer_class = CookieTokenRefreshSerializer
@@ -234,10 +256,11 @@ class RegisterView(CreateAPIView):
             }
         }
 
-        # Configura la cookie
-        cookie_max_age = 3600 * 24 * 14  # 14 days
+        cookie_max_age = 60 * 60 * 2
+
         response = JsonResponse(response_data)
-        response.set_cookie('refresh_token', response.data['refresh'], httponly=True, samesite='None' , secure=True )
+        response.set_cookie('refresh_token', str(refresh), max_age=cookie_max_age , httponly=True, samesite='None', secure=True)
+
 
         return response
 
@@ -278,12 +301,13 @@ class LogoutView(APIView):
     def post(self, request):
         try:
             refreshToken = request.COOKIES.get('refresh_token')
-            token = RefreshToken(refreshToken)
+            token = RefreshToken(str(refreshToken))
             token.blacklist()
             response = JsonResponse({"message": "Refresh token revoked"})
-            response.delete_cookie("refresh_token")
+            response.set_cookie('refresh_token',  httponly=True, max_age=timedelta(seconds=-10) ,samesite='None', secure=True)
             return response
         except:
-            response = JsonResponse({"message": "Invalid token or token has expired"}, status=400)
+            response.set_cookie('refresh_token',   httponly=True, max_age=timedelta(seconds=-10) ,samesite='None', secure=True)
+            response = JsonResponse({"message": "Refresh token revoked"})
             return response
 
