@@ -1,4 +1,5 @@
 git clone https://github.com/fra-zelada/drf_blog.git
+cd drf_blog
 py -m venv venv
 
 .\venv\Scripts\activate
