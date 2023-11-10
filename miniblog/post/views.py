@@ -79,8 +79,9 @@ class PostCreateAPIView(CreateAPIView):
 
 class PostListAPIView(ListAPIView):
     """"""
-    queryset = Post.objects.all()
+    queryset = Post.objects.all().order_by('-created_at')
     serializer_class = PostSerializer
+
 
 
 
