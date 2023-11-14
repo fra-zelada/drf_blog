@@ -11,6 +11,14 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
+from dotenv import load_dotenv
+
+sup_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
+dotenv_path = os.path.join(sup_dir, ".env")
+
+
+load_dotenv(dotenv_path)
+
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'miniblog.settings')
 
 application = get_wsgi_application()

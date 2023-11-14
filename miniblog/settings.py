@@ -5,8 +5,8 @@ from pathlib import Path
 from datetime import timedelta
 
 # Load environment variables from .env
-from dotenv import load_dotenv
-load_dotenv()
+# from dotenv import load_dotenv
+# load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -155,3 +155,13 @@ SESSION_COOKIE_SAMESITE = None
 CSRF_COOKIE_SAMESITE = None
 SESSION_COOKIE_DOMAIN = ".192.168.1.108:5173"
 CSRF_COOKIE_HTTPONLY = True
+
+# CLOUDINARY_URL='cloudinary://273354756138527:Vo6X2gCGinhLG-5-KT874zdYyoo@dwvkka6mz'
+# CLOUDINARY_CLOUD_NAME='dwvkka6mz'
+# CLOUDINARY_API_KEY='273354756138527'
+# CLOUDINARY_API_SECRET='Vo6X2gCGinhLG-5-KT874zdYyoo'
+
+CLOUDINARY_URL = os.getenv("CLOUDINARY_URL")
+CLOUDINARY_CLOUD_NAME = os.getenv("CLOUDINARY_CLOUD_NAME")
+CLOUDINARY_API_KEY = os.getenv("CLOUDINARY_API_KEY")
+CLOUDINARY_API_SECRET = os.getenv("CLOUDINARY_API_SECRET")

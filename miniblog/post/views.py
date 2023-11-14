@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import get_user
 
 from miniblog import settings
+from miniblog.post.cloudinary_utils import upload_to_cloudinary
 
 from .models import Comment, Image, Post
 from .serializers import CommentSerializer, PostSerializer, RegisterSerializer, UserSerializer
@@ -53,13 +54,13 @@ class PostCreateAPIView(CreateAPIView):
 
         # Sube la imagen a Cloudinary
         try:
-            upload_result = cloudinary.uploader.upload(image)
-            secure_url = upload_result.get('secure_url')
+            cloudinary_url, asset_id = upload_to_cloudinary(image, public_id='custom_public_id')
+
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         # Crea una instancia de Image para la imagen
-        image_instance = Image.objects.create(asset_id=upload_result['asset_id'], secure_url=secure_url)
+        image_instance = Image.objects.create(asset_id=asset_id, secure_url=cloudinary_url)
 
         # Crea una instancia de Post y asocia la imagen y el author
         data = {

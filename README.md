@@ -7,15 +7,7 @@ Backend for the [WrestlingGram](https://github.com/fra-zelada/wrestlingGram) pro
 
 ```
 git clone https://github.com/fra-zelada/drf_blog.git
-<<<<<<< HEAD
 cd drf_blog
-=======
-```
-
-### Set Up a Virtual Environment:
-
-```
->>>>>>> origin/main
 py -m venv venv
 ```
 
