@@ -158,9 +158,11 @@ CSRF_COOKIE_SAMESITE = None
 SESSION_COOKIE_DOMAIN = ".192.168.1.108:5173"
 CSRF_COOKIE_HTTPONLY = True
 
+cld_api_proxy = os.getenv('CLOUDINARY_API_PROXY')
+
 CLOUDINARY = {
     'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME'),
     'API_KEY': os.getenv('CLOUDINARY_API_KEY'),
     'API_SECRET': os.getenv('CLOUDINARY_API_SECRET'),
-    'API_PROXY': os.getenv('CLOUDINARY_API_PROXY'),
+    'API_PROXY': None if cld_api_proxy == '' else cld_api_proxy,
 }

@@ -25,9 +25,9 @@ from cloudinary.uploader import upload
 #         raise RuntimeError(f"Error configuring Cloudinary: {e}")
 
 def upload_to_cloudinary(file_path, public_id=None,):
-    print('configuring')
+
     # configure_cloudinary()
-    print('uploading')
+
     try:
         result = upload(file_path, public_id=public_id,  upload_preset='react-journal')
         return result['secure_url'], result['asset_id']
