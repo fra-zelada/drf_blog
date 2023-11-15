@@ -3,7 +3,9 @@
 import os
 from pathlib import Path
 from datetime import timedelta
-
+# Load environment variables from .env
+from dotenv import load_dotenv
+load_dotenv()
 # Load environment variables from .env
 # from dotenv import load_dotenv
 # load_dotenv()
@@ -157,8 +159,8 @@ SESSION_COOKIE_DOMAIN = ".192.168.1.108:5173"
 CSRF_COOKIE_HTTPONLY = True
 
 CLOUDINARY = {
-      'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME'),
-      'API_KEY': os.getenv('CLOUDINARY_API_KEY'),
-      'API_SECRET': os.getenv('API_SECRET'),
-      'API_PROXY': os.getenv('CLOUDINARY_API_PROXY'),
+    'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': os.getenv('CLOUDINARY_API_KEY'),
+    'API_SECRET': os.getenv('CLOUDINARY_API_SECRET'),
+    'API_PROXY': os.getenv('CLOUDINARY_API_PROXY'),
 }
