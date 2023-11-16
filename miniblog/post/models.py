@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 class Image(models.Model):
     asset_id = models.CharField(max_length=100)
     secure_url = models.URLField()
+    public_id = models.CharField(max_length=100)
 
     def __str__(self):
         return f"Asset ID: {self.asset_id}"

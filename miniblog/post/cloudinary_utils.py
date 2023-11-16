@@ -1,35 +1,28 @@
-# from django.conf import settings
-# import cloudinary
-# import os
+
 from cloudinary.uploader import upload
-# import cloudinary.api
+import cloudinary.uploader
+import cloudinary.api
 
-
-# def configure_cloudinary():
-#     try:
-#         cloudinary.config(
-#             cloud_name='dwvkka6mz',
-#             api_key='273354756138527',
-#             api_secret='Vo6X2gCGinhLG',
-#             # secure=True
-#         )
-#         # cloudinary.config(
-#         #     cloud_name=settings.CLOUDINARY['CLOUD_NAME'],
-#         #     api_key=settings.CLOUDINARY['API_KEY'],
-#         #     api_secret=settings.CLOUDINARY['API_SECRET'],
-#         #     api_proxy=settings.CLOUDINARY['API_PROXY'],
-#         #     secure=True
-#         # )
-#         print('success cloudinary connection')
-#     except KeyError as e:
-#         raise RuntimeError(f"Error configuring Cloudinary: {e}")
 
 def upload_to_cloudinary(file_path, public_id=None,):
 
-    # configure_cloudinary()
-
     try:
-        result = upload(file_path, public_id=public_id,  upload_preset='react-journal')
-        return result['secure_url'], result['asset_id']
+        result = upload(file_path,  upload_preset='react-journal')
+        return result['secure_url'], result['asset_id'], result['public_id']
     except Exception as e:
         raise RuntimeError(f"Error uploading to Cloudinary: {e}")
+
+def delete_image_from_cloudinary(public_id):
+    try:
+        # Verificar si la imagen existe en Cloudinary
+        image_info = cloudinary.api.resource(public_id)
+        if image_info.get('error'):
+            # La imagen no existe, no se puede eliminar
+            return {"success": False, "message": "Image does not exist in Cloudinary"}
+
+        # La imagen existe, intentar eliminarla
+        result = cloudinary.uploader.destroy(public_id)
+
+        return result  # El resultado podría contener información sobre el éxito o el error en caso de falla
+    except Exception as e:
+        raise RuntimeError(f"Error deleting from Cloudinary: {e}")

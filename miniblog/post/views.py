@@ -1,38 +1,38 @@
+# Standard libraries and cloudinary
 from datetime import timedelta
-import cloudinary.uploader
-from django.http import HttpResponse
+
+
+# Django and related models
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
-from django.contrib.auth import get_user
-
-from miniblog import settings
-from miniblog.post.cloudinary_utils import upload_to_cloudinary
-
-from .models import Comment, Image, Post
-from .serializers import CommentSerializer, PostSerializer, RegisterSerializer, UserSerializer
-
-from rest_framework.generics import (ListAPIView, CreateAPIView, RetrieveUpdateDestroyAPIView , ListCreateAPIView, RetrieveAPIView)
-# from rest_framework import (viewsets, status)
-from rest_framework import status
-from rest_framework.response import Response
-from rest_framework.decorators import api_view
-from rest_framework.permissions import IsAuthenticated, AllowAny
-from django.views.decorators.csrf import ensure_csrf_cookie
-from rest_framework_simplejwt.serializers import TokenRefreshSerializer
-from rest_framework_simplejwt.exceptions import InvalidToken
-from rest_framework_simplejwt.views import TokenRefreshView, TokenObtainPairView
-from rest_framework.parsers import MultiPartParser, FormParser
-from rest_framework.response import Response
-from django.http import JsonResponse
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer  # Importa el serializador predeterminado
-from rest_framework_simplejwt.views import TokenViewBase
-
 
 from django.contrib.auth import authenticate
 
+# Custom serializers and models
+from miniblog.post.cloudinary_utils import delete_image_from_cloudinary, upload_to_cloudinary
+from .models import Comment, Image, Post
+from .serializers import CommentSerializer, PostSerializer, RegisterSerializer, UserSerializer
+
+# Django Rest Framework and its components
+from rest_framework.generics import (
+    ListAPIView,
+    CreateAPIView,
+    RetrieveUpdateDestroyAPIView,
+    ListCreateAPIView,
+
+)
+from rest_framework import status
+from rest_framework.exceptions import APIException
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
+from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
+from rest_framework_simplejwt.views import TokenRefreshView, TokenObtainPairView
+from rest_framework.parsers import MultiPartParser
+from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_simplejwt.tokens import AccessToken
+from rest_framework_simplejwt.serializers import TokenRefreshSerializer, TokenObtainPairSerializer  # Import the default serializer
 
 
 
@@ -54,13 +54,13 @@ class PostCreateAPIView(CreateAPIView):
 
         # Sube la imagen a Cloudinary
         try:
-            cloudinary_url, asset_id = upload_to_cloudinary(image, public_id='custom_public_id')
+            cloudinary_url, asset_id, public_id = upload_to_cloudinary(image)
 
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         # Crea una instancia de Image para la imagen
-        image_instance = Image.objects.create(asset_id=asset_id, secure_url=cloudinary_url)
+        image_instance = Image.objects.create(asset_id=asset_id, secure_url=cloudinary_url, public_id=public_id)
 
         # Crea una instancia de Post y asocia la imagen y el author
         data = {
@@ -88,29 +88,30 @@ class PostListAPIView(ListAPIView):
 
 
 class PostRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
-    """"""
     queryset = Post.objects.all()
     serializer_class = PostSerializer
+
     def get_permissions(self):
         if self.request.method == 'GET':
-            # Permitir acceso no autenticado solo para GET (recuperación)
             return []
         else:
-            # Requiere autenticación para otros métodos (update, destroy, etc.)
             return [IsAuthenticated()]
-            # return []
+
     def delete(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return Response({'user': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
 
-        # Obtén el objeto Post o devuelve un error 404 si no existe
-        post = get_object_or_404(Post, pk=kwargs['pk'])
+        post = self.get_object()
 
         if post.author != request.user:
-            # Si el usuario no es el autor del post, no se le permite eliminarlo
             return Response({'user': 'Unauthorized user for delete this post'}, status=status.HTTP_403_FORBIDDEN)
 
-        # El usuario está autenticado y es el autor del post, procede con la eliminación
+        # Eliminar la imagen de Cloudinary si existe
+        image = post.image
+        if image:
+            delete_image_from_cloudinary(image.public_id)
+
+
         return super().delete(request, *args, **kwargs)
 
 
@@ -301,15 +302,18 @@ class LogoutView(APIView):
     permission_classes = (AllowAny,)
 
     def post(self, request):
+        response = JsonResponse({"message": "Refresh token revoked"})
+        response.set_cookie('refresh_token', httponly=True, max_age=timedelta(seconds=-10), samesite='None', secure=True)
         try:
             refreshToken = request.COOKIES.get('refresh_token')
+            if not refreshToken:
+                raise APIException('Refresh token not found')
             token = RefreshToken(str(refreshToken))
             token.blacklist()
-            response = JsonResponse({"message": "Refresh token revoked"})
-            response.set_cookie('refresh_token',  httponly=True, max_age=timedelta(seconds=-10) ,samesite='None', secure=True)
             return response
-        except:
-            response.set_cookie('refresh_token',   httponly=True, max_age=timedelta(seconds=-10) ,samesite='None', secure=True)
-            response = JsonResponse({"message": "Refresh token revoked"})
-            return response
-
+        except TokenError as e:
+            return JsonResponse({"message": "Error revoking token"})
+        except APIException as e:
+            return JsonResponse({"message": str(e)})
+        except Exception as e:
+            return JsonResponse({"message": "An unexpected error occurred"})

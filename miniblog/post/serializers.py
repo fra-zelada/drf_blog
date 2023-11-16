@@ -37,7 +37,8 @@ class PostSerializer(serializers.ModelSerializer):
         if image:
             representation['image'] = {
                 'asset_id': image.asset_id,
-                'secure_url': image.secure_url
+                'secure_url': image.secure_url,
+                'public_id': image.public_id
             }
         return representation
 
