@@ -91,5 +91,31 @@ git pull
 Manually modify ```settings.py```, adding production database details
 
 
+### Delete a post from python shell
+
+Start the Django interactive console:
+```
+python manage.py shell
+```
+
+Import the Post model and display the IDs of posts:
+```
+from miniblog.post.models import Post
+
+# Retrieve all posts and display their IDs and titles
+all_posts = Post.objects.all()
+
+for post in all_posts:
+    print(f"ID: {post.id}, Title: {post.title}")
+```
+
+Delete the post using its ID:
+```
+# Replace 'id_of_post' with the ID of the post you want to delete
+post_to_delete = Post.objects.get(id=id_of_post)
+post_to_delete.delete()
+```
+
+
 
 
