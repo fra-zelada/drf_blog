@@ -303,17 +303,16 @@ class LogoutView(APIView):
 
     def post(self, request):
         response = JsonResponse({"message": "Refresh token revoked"})
-        response.set_cookie('refresh_token', httponly=True, max_age=timedelta(seconds=-10), samesite='None', secure=True)
-        try:
-            refreshToken = request.COOKIES.get('refresh_token')
-            if not refreshToken:
-                raise APIException('Refresh token not found')
-            token = RefreshToken(str(refreshToken))
-            token.blacklist()
-            return response
-        except TokenError as e:
-            return JsonResponse({"message": "Error revoking token"})
-        except APIException as e:
-            return JsonResponse({"message": str(e)})
-        except Exception as e:
-            return JsonResponse({"message": "An unexpected error occurred"})
+        response.set_cookie('refresh_token', '', httponly=True, max_age=0, samesite='None', secure=True)
+
+        refreshToken = request.COOKIES.get('refresh_token')
+        if refreshToken:
+            try:
+                token = RefreshToken(str(refreshToken))
+                token.blacklist()
+            except TokenError as e:
+                response = JsonResponse({"message": "Error revoking token"})
+                response.set_cookie('refresh_token', '', httponly=True, max_age=0, samesite='None', secure=True)
+                return response
+
+        return response
