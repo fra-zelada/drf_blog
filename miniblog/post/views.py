@@ -47,7 +47,7 @@ class PostCreateAPIView(CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         # Obtén el usuario actual autenticado como autor
-        author = self.request.user
+        author = request.user
 
         # Obtén la imagen de la solicitud POST
         image = request.data.get('image')
