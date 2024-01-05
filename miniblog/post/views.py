@@ -148,7 +148,7 @@ class CommentRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
         return super().delete(request, *args, **kwargs)
 
 class MyTokenObtainPairView(TokenObtainPairView):
-    permission_classes = [AllowAny]
+    # permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
@@ -234,7 +234,7 @@ class CookieTokenRefreshView(TokenRefreshView):
 
 class RegisterView(CreateAPIView):
     queryset = User.objects.all()
-    permission_classes = (AllowAny,)
+    # permission_classes = (AllowAny,)
     serializer_class = RegisterSerializer
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -299,7 +299,7 @@ class MyLoginView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class LogoutView(APIView):
-    permission_classes = (AllowAny,)
+    # permission_classes = (AllowAny,)
 
     def post(self, request):
         response = JsonResponse({"message": "Refresh token revoked"})
